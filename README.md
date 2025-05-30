@@ -33,7 +33,7 @@ This is the official static website, built using:
 
 ## 🔗 Live Preview
 
-👉 [https://novaassist.vercel.app](https://novaassist.vercel.app) *(Replace with your real link after deploy)*
+👉 https://nova-assist-gilt.vercel.app/
 
 ---
 
