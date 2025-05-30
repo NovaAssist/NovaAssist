@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaAssist - Your All-in-One Discord Automation Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0e0e23;
+            --bg-secondary: #1a1a3a;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #8b5cf6;
+            --accent-teal: #14b8a6;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --glass-bg: rgba(0, 0, 0, 0.02);
+            --glass-border: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, var(--bg-primary), var(--bg-secondary));
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 80%, var(--accent-purple) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, var(--accent-cyan) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, var(--accent-teal) 0%, transparent 50%);
+            opacity: 0.1;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .theme-toggle {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--text-primary), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--accent-cyan), var(--accent-purple));
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.4);
+        }
+
+        .creator-badge {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, var(--text-primary), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 2rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .feature-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* FAQ Section */
+        .faq {
+            padding: 4rem 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background: var(--glass-bg);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .faq-answer.open {
+            padding: 1.5rem;
+            max-height: 200px;
+        }
+
+        .faq-toggle {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-toggle.open {
+            transform: rotate(45deg);
+        }
+
+        /* About Section */
+        .about {
+            padding: 4rem 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .about-card {
+            background: linear-gradient(45deg, var(--accent-purple), var(--accent-cyan));
+            padding: 3rem;
+            border-radius: 25px;
+            color: white;
+        }
+
+        .about-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .about-description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary);
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--accent-cyan);
+        }
+
+        .footer-credit {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav {
+                padding: 0 1rem;
+            }
+
+            .hero {
+                padding: 0 1rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .privacy-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .retention-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .rights-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .contact-links {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Privacy Policy Section */
+        .privacy-policy {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .privacy-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .privacy-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 3rem;
+        }
+
+        .privacy-card h3 {
+            color: var(--accent-cyan);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .privacy-card h4 {
+            color: var(--text-primary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .privacy-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .privacy-card ul {
+            color: var(--text-secondary);
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .privacy-card li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .privacy-card a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .privacy-card a:hover {
+            color: var(--accent-purple);
+            text-decoration: underline;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-cyan);
+        }
+
+        .info-item h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .info-item p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Lists */
+        .use-list, .security-list, .third-party-list {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .use-list li, .security-list li, .third-party-list li {
+            margin-bottom: 0.8rem;
+        }
+
+        /* Retention Grid */
+        .retention-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .retention-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .retention-item:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-teal);
+        }
+
+        .retention-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .retention-item strong {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .retention-item p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Rights Grid */
+        .rights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .right-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .right-item:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-purple);
+        }
+
+        .right-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .right-item strong {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .right-item p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Contact Info */
+        .contact-info {
+            background: linear-gradient(45deg, var(--accent-purple), var(--accent-cyan));
+            padding: 2rem;
+            border-radius: 20px;
+            color: white;
+            margin: 2rem 0;
+        }
+
+        .contact-info p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .contact-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .contact-link {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .contact-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .contact-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .contact-link strong {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .contact-link p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Compliance Notice */
+        .compliance-notice {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .compliance-notice em {
+            color: var(--text-secondary);
+            font-style: normal;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+
+        .modal-header {
+            background: linear-gradient(45deg, var(--accent-purple), var(--accent-cyan));
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .modal-close {
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .modal-close:hover {
+            transform: scale(1.2);
+        }
+
+        .modal-body {
+            padding: 2rem;
+            max-height: 60vh;
+            overflow-y: auto;
+            color: var(--text-primary);
+        }
+
+        .modal-body h3 {
+            color: var(--accent-cyan);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-body h4 {
+            color: var(--text-primary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-body ul {
+            margin-left: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-body li {
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-body a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+
+        .modal-body a:hover {
+            text-decoration: underline;
+        }
+
+        /* Animation utilities */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="bg-animation"></div>
+    
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">NovaAssist</div>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Meet NovaAssist — Your All-in-One Discord Automation Engine</h1>
+            <p>Empower your server with smart moderation, seamless utilities, AI chat, and next-gen server control tools.</p>
+            
+            <div class="cta-buttons">
+                <a href="https://discord.com/oauth2/authorize?client_id=1376582699191636109&permissions=8&integration_type=0&scope=bot" class="btn btn-primary" target="_blank">
+                    ✨ Invite NovaAssist
+                </a>
+                <a href="https://discord.gg/cDCPShszSs" class="btn btn-secondary" target="_blank">
+                    🔧 Join Support Server
+                </a>
+            </div>
+            
+            <div class="creator-badge">
+                Made by Unkn0wn & Wazzup
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats fade-in">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🔁</div>
+                <div class="stat-value" data-target="99.99">0</div>
+                <div class="stat-label">% Uptime</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🌐</div>
+                <div class="stat-value" data-target="50">0</div>
+                <div class="stat-label">Active Servers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-value" data-target="125">0</div>
+                <div class="stat-label">ms Average Ping</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🧠</div>
+                <div class="stat-value" data-target="100">0</div>
+                <div class="stat-label">Commands Available</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h2 class="section-title fade-in">Powerful Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🛡</span>
+                <h3 class="feature-title">Advanced Moderation</h3>
+                <p class="feature-description">AutoMod system with timed bans/mutes, intelligent spam filters, and comprehensive moderation logs to keep your server safe and organized.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">⚙</span>
+                <h3 class="feature-title">Utility Commands</h3>
+                <p class="feature-description">Complete role management, slowmode controls, poll creator, custom timers, and channel management tools for ultimate server control.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">📜</span>
+                <h3 class="feature-title">Comprehensive Logging</h3>
+                <p class="feature-description">Track message edits and deletions, monitor mod actions, log user joins and leaves with detailed timestamps and context.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🧠</span>
+                <h3 class="feature-title">AI Assistant</h3>
+                <p class="feature-description">Built-in conversational AI to help server members with questions, provide support, and enhance community engagement.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🧩</span>
+                <h3 class="feature-title">Custom Commands</h3>
+                <p class="feature-description">Create personalized commands through our dashboard or slash command interface, tailored to your server's unique needs.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🔐</span>
+                <h3 class="feature-title">Security & Verification</h3>
+                <p class="feature-description">CAPTCHA onboarding system, anti-raid protection, and comprehensive permission auditing to secure your community.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq">
+        <h2 class="section-title fade-in">Frequently Asked Questions</h2>
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>Is NovaAssist free to use?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes, NovaAssist is completely free to use with all core features included. We may introduce optional premium features in the future.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>Does it support slash commands?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes, NovaAssist is fully optimized for Discord's modern slash command interface, providing a seamless user experience.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>How can I suggest features?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Join our Support Server and use the feedback channel to suggest new features or improvements. We actively listen to our community!</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>Is the bot safe and regularly updated?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Absolutely! NovaAssist is maintained by experienced developers with regular updates, secure architecture, and 99.99% uptime reliability.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about">
+        <div class="about-card fade-in">
+            <h2 class="about-title">Built by Passionate Developers</h2>
+            <p class="about-description">NovaAssist is developed by Unkn0wn & Wazzup — Discord builders focused on creating powerful, user-friendly tools for community growth and management.</p>
+        </div>
+    </section>
+
+    <!-- Privacy Policy Section -->
+    <section class="privacy-policy" id="privacy">
+        <div class="privacy-container">
+            <h2 class="section-title fade-in">Privacy Policy</h2>
+            <div class="privacy-content fade-in">
+                <div class="privacy-card">
+                    <p><strong>Effective Date:</strong> January 1, 2025 | <strong>Last Updated:</strong> January 1, 2025</p>
+                    
+                    <h3>🔒 Introduction</h3>
+                    <p>NovaAssist ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Discord bot service and related website.</p>
+                    
+                    <h3>📊 Information We Collect</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <h4>🤖 Discord User Data</h4>
+                            <p>User IDs, usernames, discriminators, and avatars for bot functionality</p>
+                        </div>
+                        <div class="info-item">
+                            <h4>🏠 Server Information</h4>
+                            <p>Server IDs, channel IDs, role information, and customization settings</p>
+                        </div>
+                        <div class="info-item">
+                            <h4>💬 Message Data</h4>
+                            <p>Message content for moderation purposes (only when necessary for bot functions)</p>
+                        </div>
+                        <div class="info-item">
+                            <h4>📈 Usage Analytics</h4>
+                            <p>Command usage statistics, feature utilization, and performance metrics</p>
+                        </div>
+                    </div>
+                    
+                    <h3>⚙️ How We Use Your Information</h3>
+                    <ul class="use-list">
+                        <li><strong>Core Services:</strong> Providing moderation, automation, and AI assistance</li>
+                        <li><strong>Security:</strong> Protecting against spam, abuse, and malicious activities</li>
+                        <li><strong>Improvement:</strong> Analyzing usage patterns to enhance bot performance</li>
+                        <li><strong>Support:</strong> Troubleshooting issues and providing customer assistance</li>
+                    </ul>
+                    
+                    <h3>💾 Data Storage & Retention</h3>
+                    <div class="retention-grid">
+                        <div class="retention-item">
+                            <span class="retention-icon">🔄</span>
+                            <div>
+                                <strong>Active Server Data</strong>
+                                <p>Retained while bot is active in your server</p>
+                            </div>
+                        </div>
+                        <div class="retention-item">
+                            <span class="retention-icon">📝</span>
+                            <div>
+                                <strong>Moderation Logs</strong>
+                                <p>Stored for up to 90 days for security purposes</p>
+                            </div>
+                        </div>
+                        <div class="retention-item">
+                            <span class="retention-icon">⚙️</span>
+                            <div>
+                                <strong>User Preferences</strong>
+                                <p>Kept until manually deleted or account deactivation</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>🛡️ Data Security</h3>
+                    <p>We implement industry-standard security measures including:</p>
+                    <ul class="security-list">
+                        <li>🔐 Encrypted data transmission using TLS/SSL protocols</li>
+                        <li>🏢 Secure database storage with access controls</li>
+                        <li>🔍 Regular security audits and vulnerability assessments</li>
+                        <li>👥 Limited access to personal data on need-to-know basis</li>
+                    </ul>
+                    
+                    <h3>👤 Your Rights</h3>
+                    <div class="rights-grid">
+                        <div class="right-item">
+                            <span class="right-icon">👁️</span>
+                            <div>
+                                <strong>Access</strong>
+                                <p>Request information about data we have collected</p>
+                            </div>
+                        </div>
+                        <div class="right-item">
+                            <span class="right-icon">✏️</span>
+                            <div>
+                                <strong>Correction</strong>
+                                <p>Update or correct inaccurate personal information</p>
+                            </div>
+                        </div>
+                        <div class="right-item">
+                            <span class="right-icon">🗑️</span>
+                            <div>
+                                <strong>Deletion</strong>
+                                <p>Request deletion of your personal data</p>
+                            </div>
+                        </div>
+                        <div class="right-item">
+                            <span class="right-icon">📤</span>
+                            <div>
+                                <strong>Portability</strong>
+                                <p>Receive a copy of your data in machine-readable format</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>🔗 Third-Party Services</h3>
+                    <p>NovaAssist integrates with the following services:</p>
+                    <ul class="third-party-list">
+                        <li><strong>Discord:</strong> Core platform integration - <a href="https://discord.com/privacy" target="_blank">Discord Privacy Policy</a></li>
+                        <li><strong>OpenAI:</strong> AI-powered features - <a href="https://openai.com/privacy/" target="_blank">OpenAI Privacy Policy</a></li>
+                    </ul>
+                    
+                    <h3>👶 Children's Privacy</h3>
+                    <p>NovaAssist is not intended for use by children under 13 years of age. We do not knowingly collect personal information from children under 13. If we become aware of such collection, we will delete the information promptly.</p>
+                    
+                    <h3>🌍 International Data Transfers</h3>
+                    <p>Your information may be transferred to and processed in countries other than your own. We ensure appropriate safeguards are in place to protect your information in accordance with this Privacy Policy.</p>
+                    
+                    <h3>📢 Changes to This Policy</h3>
+                    <p>We may update this Privacy Policy from time to time. Material changes will be announced through:</p>
+                    <ul>
+                        <li>Updates posted on our website</li>
+                        <li>Announcements in our Discord server</li>
+                        <li>Direct notifications for significant changes</li>
+                    </ul>
+                    
+                    <h3>📞 Contact Information</h3>
+                    <div class="contact-info">
+                        <p>For questions about this Privacy Policy or our data practices:</p>
+                        <div class="contact-links">
+                            <a href="https://discord.gg/cDCPShszSs" class="contact-link" target="_blank">
+                                <span class="contact-icon">💬</span>
+                                <div>
+                                    <strong>Discord Server</strong>
+                                    <p>Get support and ask questions</p>
+                                </div>
+                            </a>
+                            <a href="https://github.com/NovaAssist" class="contact-link" target="_blank">
+                                <span class="contact-icon">🐱</span>
+                                <div>
+                                    <strong>GitHub Repository</strong>
+                                    <p>View source code and report issues</p>
+                                </div>
+                            </a>
+                        </div>
+                        <p><strong>Developers:</strong> Unkn0wn & Wazzup</p>
+                    </div>
+                    
+                    <div class="compliance-notice">
+                        <p><em>📋 This Privacy Policy is designed to comply with GDPR, CCPA, and other applicable data protection laws. We are committed to transparent data practices and protecting your privacy rights.</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="https://discord.com/oauth2/authorize?client_id=1376582699191636109&permissions=8&integration_type=0&scope=bot" class="footer-link" target="_blank">📥 Invite NovaAssist</a>
+            <a href="https://discord.gg/cDCPShszSs" class="footer-link" target="_blank">🛠 Support Server</a>
+            <a href="#privacy" class="footer-link">📄 Privacy Policy</a>
+            <a href="https://github.com/NovaAssist" class="footer-link" target="_blank">🐱 GitHub</a>
+        </div>
+        <div class="footer-credit">
+            © 2025 NovaAssist | Built with 💙 by Unkn0wn & Wazzup
+        </div>
+    </footer>
+
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            const toggle = document.querySelector('.theme-toggle');
+            
+            body.setAttribute('data-theme', newTheme);
+            toggle.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+        }
+
+        // Scroll animations
+        function handleScrollAnimations() {
+            const elements = document.querySelectorAll('.fade-in, .feature-card');
+            
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+
+        // Counter animation
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stat-value');
+            
+            counters.forEach(counter => {
+                const target = parseFloat(counter.getAttribute('data-target'));
+                const increment = target / 100;
+                let current = 0;
+                
+                const updateCounter = () => {
+                    if (current < target) {
+                        current += increment;
+                        if (target === 99.99) {
+                            counter.textContent = current.toFixed(2);
+                        } else {
+                            counter.textContent = Math.ceil(current);
+                        }
+                        setTimeout(updateCounter, 20);
+                    } else {
+                        if (target === 99.99) {
+                            counter.textContent = target.toFixed(2);
+                        } else {
+                            counter.textContent = target;
+                        }
+                    }
+                };
+                
+                updateCounter();
+            });
+        }
+
+        // FAQ Toggle
+        function toggleFAQ(element) {
+            const answer = element.nextElementSibling;
+            const toggle = element.querySelector('.faq-toggle');
+            
+            answer.classList.toggle('open');
+            toggle.classList.toggle('open');
+        }
+
+        // Initialize animations on scroll
+        window.addEventListener('scroll', handleScrollAnimations);
+        window.addEventListener('load', () => {
+            handleScrollAnimations();
+            setTimeout(animateCounters, 500);
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
